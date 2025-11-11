@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISMAUDIO: DECOMPOSED CHAIN-OF-THOUGHTS AND MULTI-DIMENSIONAL REWARDS FOR VIDEO-TO-AUDIO GENERATION</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Nunito:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap'); /* Font for Carousel */
+
+        :root {
+            --primary-color: #4A90E2; /* Professional Blue */
+            --secondary-color: #50E3C2; /* Bright Teal for accents */
+            --text-color: #333333; /* Dark Grey for readability */
+            --light-text-color: #7A7A7A; /* Softer grey for subtext */
+            --background-color: #FFFFFF; /* Clean White */
+            --card-background: #FDFDFD; /* Almost white for subtle depth */
+            --border-radius: 24px;
+            --shadow-light: 0 8px 25px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 35px rgba(74, 144, 226, 0.2); /* Glowing blue shadow */
+            --light-tint: #F4F8FC; /* Very light blue tint */
+            --border-color: #EAEAEA;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            scroll-behavior: smooth;
+            text-align: center;
+            overflow-x: hidden; /* Add this to prevent horizontal scroll from blobs */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 5.5em;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        #abstract h2 {
+            margin-top: 0;
+        }
+        
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5em;
+            color: var(--text-color);
+            font-weight: 700;
+            margin-top: 70px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+        }
+
+        h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.6em;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.6em;
+            color: var(--light-text-color);
+            font-weight: 400;
+            margin-top: 10px;
+            text-align: center;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* --- START: Fancy Header with Wave and Blobs (UPDATED) --- */
+        header {
+            text-align: center;
+            padding: 80px 0 120px 0; /* Increased bottom padding for wave */
+            background-color: var(--light-tint);
+            position: relative;
+            /* overflow: hidden;  <-- REMOVED THIS LINE TO MAKE BLOBS VISIBLE */
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* Height of the wave */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23FFFFFF' fill-opacity='1' d='M0,192L48,176C96,160,192,128,288,133.3C384,139,480,181,576,186.7C672,192,768,160,864,144C960,128,1056,128,1152,149.3C1248,171,1344,213,1392,234.7L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: bottom;
+            z-index: 10;
+        }
+
+        .decorative-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(50px); /* Increased blur slightly */
+            z-index: 1;
+        }
+
+        .blob1 {
+            width: 300px;
+            height: 300px;
+            /* UPDATED: Increased opacity from 0.15 to 0.25 */
+            background-color: rgba(74, 144, 226, 0.25); /* Primary Color */
+            top: -50px;
+            left: -100px;
+        }
+
+        .blob2 {
+            width: 250px;
+            height: 250px;
+            /* UPDATED: Increased opacity from 0.1 to 0.2 */
+            background-color: rgba(80, 227, 194, 0.2); /* Secondary Color */
+            bottom: -80px;
+            right: -80px;
+        }
+
+        header .container {
+             position: relative;
+             z-index: 5;
+        }
+        /* --- END: Fancy Header --- */
+
+        p.abstract-text {
+            max-width: 1220px;
+            margin: 30px auto;
+            padding: 40px;
+            font-size: 1.2em;
+            color: var(--text-color);
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            border: none;
+        }
+
+        #advantage img {
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-light);
+            border-radius: var(--border-radius);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #advantage img:hover {
+            transform: scale(1.02);
+        }
+
+        .demo-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            background-color: var(--card-background);
+            border: none;
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            text-align: left;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td:first-child, th:first-child {
+            text-align: left;
+            font-weight: 700;
+        }
+
+        thead th {
+            background-color: var(--light-tint);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--light-tint);
+        }
+
+        .our-row {
+            background-color: #e7f5ff !important;
+            font-weight: 700;
+        }
+
+        .ablation-row-data {
+            background-color: #f1f3f5 !important;
+        }
+
+        caption {
+            caption-side: top;
+            text-align: center;
+            padding: 1rem 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            background-color: var(--light-tint);
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .analysis-points {
+            background: var(--light-tint);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem auto 2.5rem auto;
+            border-radius: 8px;
+            max-width: 900px;
+            text-align: left;
+            font-size: 1.05em;
+        }
+
+        .demo-preview-card {
+            background: var(--background-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .demo-preview-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .preview-media {
+            width: 100%;
+            height: 150px;
+            background-color: var(--light-tint);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--primary-color);
+            border: 2px dashed var(--primary-color);
+            font-size: 1.5em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .demo-preview-card:hover .preview-media {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .demo-preview-card > p {
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-top: auto;
+        }
+
+        /* --- START: Fancy Angled Section (UPDATED) --- */
+        .results-section {
+            padding: 120px 40px 40px 40px; /* Increased top padding for angled shape */
+            background-color: var(--light-tint);
+            border-radius: var(--border-radius);
+            margin-top: 60px;
+            position: relative;
+            /* UPDATED: Changed from 5% to a more noticeable 80px */
+            clip-path: polygon(0 80px, 100% 0, 100% 100%, 0% 100%);
+        }
+        /* --- END: Fancy Angled Section --- */
+        
+        .ablation-header-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+
+        .ablation-header-cell {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .ablation-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px 10px;
+            border-radius: var(--border-radius);
+            background: rgba(255,255,255,0.5);
+            transition: background 0.3s;
+        }
+
+        .ablation-row:hover {
+            background: rgba(255,255,255,1);
+        }
+        
+        .ablation-row-label {
+            font-weight: 500;
+            text-align: center;
+            padding-right: 20px;
+            font-size: 1.1em;
+            display: none; 
+        }
+
+        .ablation-video-grid {
+            display: contents; 
+        }
+        
+        .ablation-video-placeholder {
+            position: relative;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .ablation-video-placeholder:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .ablation-video-placeholder img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .ablation-video-placeholder .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            color: white;
+            opacity: 0.8;
+            text-shadow: 0 0 15px rgba(0,0,0,0.7);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        
+        .ablation-video-placeholder:hover .play-icon {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px 0;
+            margin-top: 60px;
+            color: var(--light-text-color);
+            font-size: 0.9em;
+            background-color: #F9F9F9;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 80px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            margin: auto;
+            padding: 40px;
+            border: none;
+            width: 85%;
+            max-width: 1200px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.4s ease-out;
+        }
+        
+        #ablationModal .modal-content {
+             max-width: 900px;
+             padding: 20px;
+        }
+        #ablationVideoPlayer {
+            width: 100%;
+            border-radius: 12px;
+            max-height: 80vh;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            color: #AAA;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 30px;
+            font-weight: bold;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        #ablationModal .close-btn {
+            top: -35px;
+            right: 0;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: var(--secondary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        #modal-title {
+            text-align: left;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+        #modal-title::after {
+            left: 0;
+            transform: none;
+        }
+
+        .full-media-placeholder {
+            background-color: #F0F0F0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            font-size: 1em;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .cot-box {
+            text-align: left;
+            background-color: var(--light-tint);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--secondary-color);
+            margin-bottom: 40px;
+        }
+
+        .cot-box h3 {
+            border-left: none;
+            padding-left: 0;
+            margin-top: 0;
+        }
+
+        .cot-box p {
+            
+            color: var(--text-color);
+            font-size: 1.05em;
+        }
+        
+        .carousel-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        #carousel {
+            display: flex;
+            padding: 20px calc(50% - 180px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-card {
+            flex: 0 0 360px;
+            height: 240px;
+            margin: 0 20px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 20px;
+            border: 5px solid rgba(68, 102, 170, 0.3);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-light);
+        }
+
+        .video-card video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        #carousel.dragging {
+            cursor: grabbing;
+            scroll-behavior: auto;
+        }
+
+
+        @media (max-width: 992px) {
+            h1 { font-size: 4em; }
+            h2 { font-size: 2em; }
+            .modal-content { width: 90%; margin: 10% auto; padding: 30px; }
+
+            .ablation-header-grid { display: none; }
+            .ablation-row {
+                grid-template-columns: 1fr; 
+                gap: 15px;
+                padding: 15px;
+                margin-bottom: 30px;
+                border: 1px solid var(--border-color);
+            }
+            .ablation-row-label {
+                 display: block; 
+                 border-bottom: 2px solid var(--secondary-color);
+                 padding-bottom: 10px;
+                 margin-bottom: 10px;
+            }
+            .ablation-video-grid {
+                 display: grid;
+                 grid-template-columns: repeat(3, 1fr); 
+                 gap: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h1 { font-size: 3em; }
+            .subtitle { font-size: 1em; }
+            h2 { font-size: 1.8em; }
+            .demo-preview-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 30px 15px;
+            }
+            .modal-content { padding: 20px; }
+            .ablation-video-grid {
+                 grid-template-columns: repeat(2, 1fr); 
+                 gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="decorative-blob blob1"></div>
+        <div class="decorative-blob blob2"></div>
+        
+        <div class="container">
+            <img src="fig/logo_pure.png" alt="PrismAudio illustration" width="60%" style="max-width:1200px; display:block; margin:40px auto;" />
+            <div class="subtitle">
+                Decomposed Chain-of-Thoughts and Multi-Dimensional Rewards for Video-to-Audio Generation
+            </div>
+        </div>
+    </header>
+    
+    <div class="publication-links" style="margin-bottom: 20px;margin-top: -30px;">
+        <!-- PDF Link. -->
+        <span class="link-block">
+          <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark">
+            <span class="icon">
+              <i class="fas fa-file-pdf"></i>
+            </span>
+            <span>Paper</span>
+          </a>
+        </span>
+      </div>
+
+    <div class="carousel-container">
+        <h3 style="margin-bottom: 10px;">Preview PrismAudio's AI-Generated Stereo Audio on Real Benchmark Videos</h3>
+        <strong style="text-align: center; max-width: 1250px; font-family: 'Quicksand', sans-serif; font-size: 19px; display: block; margin: 0 auto 20px; color: #344055;">
+            Tap a video to start the experience, and wear headphones 🎧 for an immersive stereo journey.
+        </strong>
+        <div id="carousel">
+            </div>
+    </div> 
+
+    <hr>
+
+    <section id="video-collab">
+        <h2>Top-tier Video Generation Models + PrismAudio</h2>
+        <div style="display: flex; justify-content: center; gap: 140px; flex-wrap: wrap; margin-top: 30px;">
+            <div style="text-align: center;">
+            <h3 style="margin-bottom: 10px;">Sora2 + PrismAudio</h3>
+            <video width="480" controls loop style="border-radius: 20px; box-shadow: var(--shadow-light);">
+                <source src="https://github.com/prismaudio/prismaudio.github.io/releases/download/test/sora2+prismaudio.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            </div>
+            <div style="text-align: center;">
+            <h3 style="margin-bottom: 10px;">Veo3 + PrismAudio</h3>
+            <video width="480" controls loop style="border-radius: 20px; box-shadow: var(--shadow-light);">
+                <source src="https://github.com/prismaudio/prismaudio.github.io/releases/download/test/veo3+prismaudio.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            </div>
+        </div>
+        </section>
+
+    <hr>
+
+    <div class="container">
+        
+        <section id="abstract">
+            <h2>Abstract</h2>
+            <p class="abstract-text" style="text-align: left;">
+                Video-to-Audio (V2A) generation requires balancing four critical perceptual dimensions: semantic consistency, audio-visual temporal synchrony, aesthetic quality, and spatial accuracy; yet existing methods suffer from objective entanglement that conflates competing goals in single loss functions and lack human preference alignment. We introduce PrismAudio, the first framework to integrate Reinforcement Learning into V2A generation with specialized Chain-of-Thought (CoT) planning. Our approach decomposes monolithic reasoning into four specialized CoT modules (Semantic, Temporal, Aesthetic, and Spatial CoT), each paired with targeted reward functions. This CoT-reward correspondence enables multidimensional RL optimization that guides the model to jointly generate better reasoning across all perspectives, solving the objective entanglement problem while preserving interpretability. To make this optimization computationally practical, we propose Fast-GRPO, which employs hybrid ODE-SDE sampling that dramatically reduces the training overhead compared to existing GRPO implementations. We also introduce AudioCanvas, a rigorous benchmark that is more distributionally balanced and covers more realistically diverse and challenging scenarios than existing datasets, with 300 single-event classes and 501 multi-event samples. Experimental results demonstrate that PrismAudio achieves state-of-the-art performance across all four perceptual dimensions on both the in-domain VGGSound test set and out-of-domain AudioCanvas benchmark. 
+            </p>
+        </section>
+        
+        <hr>
+
+        <section id="advantage">
+            <h2>The PRISMAUDIO Framework</h2>
+            <img src="fig/fig2_model.png" alt="PrismAudio illustration" width="100%" style="max-width:1200px; display:block; margin:40px auto;" />
+            <p style="text-align: center; font-size: 0.9em; color: #666; margin-top: 5px;">
+                Overview of <strong>PrismAudio</strong>. Left panel: the progress of CoT training data construction using Gemini 2.5 Pro and then fine-tuning VideoLLaMA2 for decomposed CoT generation. Right panel: the Fast-GRPO multi-dimensional CoT-RL framework for post-training the Audio Foundation Model.
+            </p>
+        </section>
+
+        
+
+        
+        
+        <hr>
+
+        <section id="hard-demos">
+            <h2>Comparison with Baselines in Multi-Event Scenarios on the AudioCanvas Benchmark</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--light-text-color); font-style: italic;">Click any card below to load the full high-fidelity comparison and Decomposed Chain-of-Thought analysis for that scene.</p>
+
+             <div class="demo-preview-grid">
+                <div class="demo-preview-card" onclick="openModal('case-19')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_63.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Chopping, Thudding</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-20')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_132.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Machining, Tapping</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-21')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_139.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Ice Cutting, Freezer Shutting</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-22')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_114.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Unlocking, Pouring</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-23')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_391.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Smoothing, Flipping</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-24')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_156.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Plastic Pop Opening</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-25')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_98.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Unrolling and Tearing Tape, Smoothing</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-26')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_89.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Piercing, Rubbing</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-27')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Multiple events_304.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Exchanging Soap, Pouring</p>
+                </div>
+            </div>
+        </section>
+        
+
+        <hr>
+
+        <section id="simple-demos">
+            <h2>Comparison with Baselines in Single-Event Scenarios on the AudioCanvas Benchmark</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--light-text-color); font-style: italic;">Click any card below to load the full high-fidelity comparison and Decomposed Chain-of-Thought analysis for that scene.</p>
+
+            <div class="demo-preview-grid">
+                <div class="demo-preview-card" onclick="openModal('case-10')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Cat_2.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Trapped Cat</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-11')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Accelerating, revving, vroom_2.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Accelerating, Revving, Vroom</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-12')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Field recording_3.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Field Recording</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-13')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Double bass_1.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Playing Double Bass</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-14')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Baby laughter_1.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Baby Laughter</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-15')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Machine gun_1.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Firing Machine Gun</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-16')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Liquid_1.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Carpet Cleaning</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-17')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Rail transport_3.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Rail Transport</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-18')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/Neigh, whinny_1.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Neigh, Whinny</p>
+                </div>
+            </div>
+        </section>
+        
+        
+
+        <hr>
+        <section id="origin-demos">
+            <h2>Comparison with Baselines on VGGSound</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--light-text-color); font-style: italic;">Click any card below to load the full high-fidelity comparison and Decomposed Chain-of-Thought analysis for that scene.</p>
+
+             <div class="demo-preview-grid">
+                <div class="demo-preview-card" onclick="openModal('case-01')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="https://raw.githubusercontent.com/prismaudio/prismaudio.github.io/main/cases/preview/_-W48cCMzXU_0001021.png" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Baltimore Oriole Calling</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-02')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/3ClbaJYWVO4_000030.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Playing Electric Guitar</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-03')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/3k8zGf8Btfo_000250.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Playing Drum Kit</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-04')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/-miI_C3At4Y_000104.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Playing Badminton</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-05')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/-fTfRh0_RQ4_000030.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Car Passing by</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-06')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/2Tx5L5RBXxw_000200.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Stream Burbling</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-07')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/1obzCbmFpa8_000410.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>People Giggling</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-08')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/1EiNSiO0UvU_000000.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>Panda Sneezing</p>
+                </div>
+                <div class="demo-preview-card" onclick="openModal('case-09')">
+                    <div class="preview-media" style="padding: 0; border: none; background: none;">
+                        <img src="cases/preview/--U7joUcTCo_000000.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;" />
+                    </div>
+                    <p>People Laughing</p>
+                </div>
+            </div>
+        </section>
+        <hr>
+        <section id="quantitative-results">
+            <h2>Quantitative Results</h2>
+            
+            <h3>In-domain Evaluation on VGGSound</h3>
+            <div class="table-container">
+                <table>
+                    <caption>Objective and Subjective evaluations on the <strong>in-domain</strong> VGGSound test set.</caption>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Method</th><th rowspan="2">Params</th><th>Semantic</th><th>Temporal</th><th colspan="4">Aesthetic Quality</th><th colspan="2">Spatial Accuracy</th><th colspan="2">Distribution</th><th colspan="2">Subjective</th><th rowspan="2">Time (s)</th>
+                        </tr>
+                        <tr>
+                            <th>CLAP↑</th><th>DeSync↓</th><th>PQ↑</th><th>PC↓</th><th>CE↑</th><th>CU↑</th><th>GCC↓</th><th>CRW↓</th><th>FD↓</th><th>KL↓</th><th>MOS-Q↑</th><th>MOS-C↑</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>GT</td><td>-</td><td>0.46</td><td>0.55</td><td>6.30</td><td>3.85</td><td>4.40</td><td>5.65</td><td>-</td><td>-</td><td>-</td><td>-</td><td>4.58±0.18</td><td>4.65±0.15</td><td>-</td></tr>
+                        <tr><td>Frieren†</td><td>159M</td><td>0.32</td><td>0.85</td><td>5.90</td><td>3.50</td><td>3.57</td><td>5.35</td><td>-</td><td>-</td><td>1.34</td><td>2.86</td><td>3.45±0.75</td><td>3.51±0.80</td><td>-</td></tr>
+                        <tr><td>V2A-Mapper†</td><td>229M</td><td>0.31</td><td>1.23</td><td>6.26</td><td>3.54</td><td>4.12</td><td>5.63</td><td>-</td><td>-</td><td><strong>0.90</strong></td><td>2.49</td><td>3.38±0.82</td><td>3.44±0.88</td><td>-</td></tr>
+                        <tr><td>AudioX</td><td>1.1B</td><td>0.41</td><td>1.24</td><td>5.94</td><td>3.43</td><td>3.86</td><td>5.44</td><td>7.22</td><td>19.25</td><td>1.51</td><td>1.80</td><td>3.61±0.75</td><td>3.65±0.72</td><td>7.52</td></tr>
+                        <tr><td>HunyuanVideo-Foley</td><td>5.31B</td><td>0.42</td><td>0.55</td><td>5.85</td><td>3.26</td><td>3.92</td><td>5.26</td><td>-</td><td>-</td><td>2.26</td><td>1.73</td><td>3.88±0.55</td><td>3.96±0.52</td><td>10.63</td></tr>
+                        <tr><td>MMAudio</td><td>1.03B</td><td>0.40</td><td>0.46</td><td>5.94</td><td>3.51</td><td>3.88</td><td>5.28</td><td>-</td><td>-</td><td>2.17</td><td>1.32</td><td>3.95±0.51</td><td>4.03±0.58</td><td>1.30</td></tr>
+                        <tr><td>ThinkSound</td><td>1.3B</td><td>0.43</td><td>0.55</td><td>6.15</td><td>3.53</td><td>3.95</td><td>5.48</td><td>4.65</td><td>13.47</td><td>1.17</td><td>1.35</td><td>4.05±0.55</td><td>4.18±0.51</td><td>1.07</td></tr>
+                        <tr class="ablation-row-data"><td>PrismAudio w/o CoT-RL</td><td>518M</td><td>0.42</td><td>0.51</td><td>6.17</td><td>3.32</td><td>3.94</td><td>5.48</td><td>4.06</td><td>10.29</td><td>1.14</td><td>1.43</td><td>4.02±0.48</td><td>4.11±0.42</td><td>0.63</td></tr>
+                        <tr class="our-row"><td>PrismAudio (Ours)</td><td>518M</td><td><strong>0.47</strong></td><td><strong>0.41</strong></td><td><strong>6.38</strong></td><td><strong>3.24</strong></td><td><strong>4.29</strong></td><td><strong>5.68</strong></td><td><strong>3.77</strong></td><td><strong>7.72</strong></td><td>1.08</td><td><strong>1.23</strong></td><td><strong>4.21±0.35</strong></td><td><strong>4.22±0.29</strong></td><td>0.63</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Out-of-Domain Evaluation on AudioCanvas</h3>
+            <div class="table-container">
+                <table>
+                    <caption>Objective and Subjective evaluations on the <strong>out-of-domain</strong> AudioCanvas benchmark.</caption>
+                    <thead>
+                    <tr><th rowspan="2">Method</th><th>Semantic</th><th>Temporal</th><th colspan="4">Aesthetic Quality</th><th colspan="2">Spatial Accuracy</th><th colspan="2">Distribution</th><th colspan="2">Subjective</th></tr>
+                        <tr><th>CLAP↑</th><th>DeSync↓</th><th>PQ↑</th><th>PC↓</th><th>CE↑</th><th>CU↑</th><th>GCC↓</th><th>CRW↓</th><th>FD↓</th><th>KL↓</th><th>MOS-Q↑</th><th>MOS-C↑</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>GT</td><td>0.48</td><td>0.40</td><td>6.47</td><td>3.16</td><td>4.02</td><td>5.99</td><td>-</td><td>-</td><td>-</td><td>-</td><td>4.65±0.23</td><td>4.72±0.20</td></tr>
+                        <tr><td>HunyuanVideo-Foley</td><td>0.44</td><td>0.47</td><td>6.43</td><td>3.25</td><td>4.04</td><td>5.88</td><td>-</td><td>-</td><td>2.04</td><td>2.07</td><td>3.75±0.52</td><td>3.71±0.58</td></tr>
+                        <tr><td>MMAudio</td><td>0.46</td><td>0.43</td><td>6.30</td><td>3.23</td><td>3.97</td><td>5.77</td><td>-</td><td>-</td><td>3.59</td><td>1.87</td><td>3.88±0.45</td><td>3.87±0.41</td></tr>
+                        <tr><td>ThinkSound</td><td>0.48</td><td>0.80</td><td>6.48</td><td>3.50</td><td>4.10</td><td>5.94</td><td>4.43</td><td>22.82</td><td>1.95</td><td>2.54</td><td>3.79±0.58</td><td>3.80±0.54</td></tr>
+                        <tr class="ablation-row-data"><td>PrismAudio w/o CoT-RL</td><td>0.42</td><td>0.44</td><td>6.45</td><td>3.22</td><td>3.81</td><td>5.87</td><td>4.11</td><td>15.30</td><td>2.10</td><td>2.17</td><td>3.91±0.35</td><td>3.85±0.31</td></tr>
+                        <tr class="our-row"><td>PrismAudio (Ours)</td><td><strong>0.52</strong></td><td><strong>0.36</strong></td><td><strong>6.68</strong></td><td><strong>2.82</strong></td><td><strong>4.26</strong></td><td><strong>6.15</strong></td><td><strong>3.50</strong></td><td><strong>12.87</strong></td><td><strong>1.92</strong></td><td><strong>1.53</strong></td><td><strong>4.12±0.28</strong></td><td><strong>4.01±0.25</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+
+        
+
+
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Full Case Study: Title Placeholder</h2>
+            
+            <div class="cot-box">
+                <h3 style="text-align: center;">Chain-of-Thought Analysis</h3>
+                <p id="modal-description">Description placeholder.</p>
+            </div>
+
+            <h3>Comparisons with Baselines</h3>
+            <div class="demo-preview-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 30px;">
+                <div id="media-1" class="full-media-placeholder"></div>
+                <div id="media-2" class="full-media-placeholder"></div>
+                <div id="media-3" class="full-media-placeholder"></div>
+                <div id="media-4" class="full-media-placeholder"></div>
+                <div id="media-5" class="full-media-placeholder"></div>
+                <div id="media-6" class="full-media-placeholder"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="ablationModal" class="modal" onclick="closeAblationModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+             <span class="close-btn" onclick="closeAblationModal()">&times;</span>
+             <video id="ablationVideoPlayer" controls autoplay muted playsinline>
+                 Your browser does not support the video tag.
+             </video>
+        </div>
+    </div>
+
+    <footer>
+        
+    </footer>
+    
+    <script>
+        // --- SCRIPT FOR ABLATION STUDY GRID ---
+        const ablationModal = document.getElementById('ablationModal');
+        const ablationVideoPlayer = document.getElementById('ablationVideoPlayer');
+
+        const ablationCases = [
+            { id: '01', name: 'Chopping and Sizzling' },
+            { id: '02', name: 'Hammering a Nail' },
+            { id: '03', name: 'Car Horn + Rain' }
+        ];
+        const ablationTypes = ['semantic', 'temporal', 'aesthetic', 'spatial', 'multidimensional'];
+        
+        const gridContainer = document.getElementById('ablation-grid-container');
+        
+        function createAblationGrid() {
+            if (!gridContainer) return;
+            let html = '';
+            ablationCases.forEach(caseInfo => {
+                 html += `<div class="ablation-row">`;
+                 html += `<div class="ablation-row-label">Case #${caseInfo.id}: ${caseInfo.name}</div>`;
+                 html += `<div class="ablation-video-grid">`;
+                 ablationTypes.forEach(type => {
+                    const videoPath = `media/ablation/${type}/case_${caseInfo.id}.mp4`;
+                    const imagePath = `media/ablation/placeholder.jpg`; 
+                    html += `
+                        <div class="ablation-video-placeholder" onclick="openAblationModal('${videoPath}')">
+                            <img src="${imagePath}" alt="${type} model for ${caseInfo.name}">
+                            <div class="play-icon">&#9658;</div>
+                        </div>
+                    `;
+                 });
+                 html += `</div></div>`;
+            });
+            gridContainer.innerHTML = html;
+        }
+
+        function openAblationModal(videoSrc) {
+            ablationVideoPlayer.src = videoSrc;
+            ablationModal.style.display = "flex";
+            ablationVideoPlayer.play();
+        }
+
+        function closeAblationModal() {
+            ablationModal.style.display = "none";
+            ablationVideoPlayer.pause();
+            ablationVideoPlayer.src = ""; 
+        }
+        
+        createAblationGrid();
+
+        // --- SCRIPT FOR GENERAL DEMOS ---
+        const demoModal = document.getElementById('demoModal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+        
+        function loadCaseData(caseId) {
+            const cases = {
+                'case-01': {
+                    title: 'Baltimore Oriole Calling',
+                    description: '<strong>&lt;Semantic&gt;</strong> Melodic chirping and varied tweeting of Baltimore orioles and mynah birds in an outdoor setting. Includes occasional sounds of birds interacting with food (oranges). <br> <strong>&lt;Temporal&gt;</strong> Immediate, continuous, and active bird calls throughout the duration. Food interaction sounds occur periodically.<br><strong>&lt;Aesthetic&gt;</strong> Lively, natural, and clear sound quality. Vocalizations are prominent. No human voices or extraneous noise.<br> <strong>&lt;Spatial&gt;</strong> Natural sound distribution across the stereo field, suggesting birds are around the listener. Food interaction sounds can be localized.' ,
+                    media: [
+                        { title: 'Ground Truth', url: 'https://github.com/user-attachments/assets/993f9c6f-6ce8-40f9-ba50-822883918ef8', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'https://github.com/user-attachments/assets/adaa4462-943a-493d-a877-e1e76e750692', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'https://github.com/user-attachments/assets/f5fde035-0a6c-4c0c-8671-5849d6ac5fda', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'https://github.com/user-attachments/assets/3e652ec8-9c71-4c73-8792-1d3394b2814a', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'https://github.com/user-attachments/assets/aca2f953-c586-4d1d-8b1a-f1fbfabe0b2c', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'https://github.com/user-attachments/assets/76c658e7-8269-4c79-823e-46e53ef439df', preview: null, type: 'video' }
+                    ]
+                },
+                'case-02': {
+                    title: 'Playing Electric Guitar',
+                    description: '<strong>&lt;Semantic&gt;</strong> Clean electric guitar sound with a clear and bright tone. The central focus is a lush, modulated texture created by a chorus effect. Background elements should be minimal, with absolutely no vocals. <br> <strong>&lt;Temporal&gt;</strong> The sound should start immediately with the guitar and effect, maintaining a steady, melodic rhythm throughout its duration without significant tempo changes or drops. <br> <strong>&lt;Aesthetic&gt;</strong> The overall sound must be clean and bright, emphasizing the chorus effect for a rich, wide texture suitable.<br> <strong>&lt;Spatial&gt;</strong> The effect should provide a wide, stereo presence, making the guitar feel expansive across the sound field. The main guitar signal should remain generally centered, allowing the modulation to pan slightly left and right.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/3ClbaJYWVO4_000030/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/3ClbaJYWVO4_000030/mmaudio.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/3ClbaJYWVO4_000030/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/3ClbaJYWVO4_000030/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/3ClbaJYWVO4_000030/thinksound.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/3ClbaJYWVO4_000030/prismaudio.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-03': {
+                    title: 'Playing Drum Kit',
+                    description: '<strong>&lt;Semantic&gt;</strong> Rhythmic drum kit sequence with consistent beats, featuring multiple drums played simultaneously. Prominent bass and snare tones are essential. <br> <strong>&lt;Temporal&gt;</strong> The sequence should maintain a steady tempo throughout, starting with immediate, consistent beats and flowing naturally without breaks or significant tempo shifts. <br> <strong>&lt;Aesthetic&gt;</strong> Drum sounds must be clear and loud, with synchronized percussion. No human voices or background noise should be present. The overall clarity and power of the drums should be emphasized. <br> <strong>&lt;Spatial&gt;</strong> The drum kit should have a natural, balanced stereo spread, allowing individual drum elements (bass, snare, hi-hats, cymbals) to occupy distinct but cohesive positions within the sound field, creating an immersive, live feel.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/3k8zGf8Btfo_000250/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/3k8zGf8Btfo_000250/mmaudio.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/3k8zGf8Btfo_000250/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/3k8zGf8Btfo_000250/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/3k8zGf8Btfo_000250/thinksound.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/3k8zGf8Btfo_000250/prismaudio.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-04': {
+                    title: 'Playing Badminton',
+                    description: '<strong>&lt;Semantic&gt;</strong> Core sound of a badminton game, featuring the shuttlecock hitting the racket with sharp, repetitive impacts, capturing rhythmic compressions. Includes ambient sounds of footsteps on the court, such as slight movements and position shifts. <br> <strong>&lt;Temporal&gt;</strong> The sound should begin immediately with active play, maintaining the rhythm of rallies throughout. Footstep movements should be integrated naturally between impacts. A subtle background hum should be constant from start to finish.<br> <strong>&lt;Aesthetic&gt;</strong> Maintain clarity and sharpness in the shuttlecock impacts. The volume of footsteps and the background hum must be subtle, serving only to add realism without dominating the core game sounds. All voices and extraneous noises (like cap gun shots) must be omitted.<br> <strong>&lt;Spatial&gt;</strong> Impacts and footwork should pan dynamically across the stereo field to simulate player movement on the court. The subtle background hum or faint background noise should remain fixed and centered to establish the environment.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/-miI_C3At4Y_000104/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/-miI_C3At4Y_000104/mmaudio_vggsound_9s.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/-miI_C3At4Y_000104/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/-miI_C3At4Y_000104/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/-miI_C3At4Y_000104/ThinkSound_vgg.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/-miI_C3At4Y_000104/-miI_C3At4Y_000104_416.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-05': {
+                    title: 'Car Passing by',
+                    description: '<strong>&lt;Semantic&gt;</strong> Powerful racing engine revving and rapidly accelerating, characterized by a roaring, high-pitched growl. Includes tires squealing and gripping the track during sharp turns or straightaways. Incorporate subtle ambient sounds of the track surface friction. Then the scene switches to an exhibition car engine starting up and revving. <br> <strong>&lt;Temporal&gt;</strong> The sound must begin with the engine revving and immediately transition into rapid acceleration. Tire squeals and friction noises should synchronize with acceleration and turning maneuvers. Then it becomes quiet, transitioning into the sound of a motor.<br> <strong>&lt;Aesthetic&gt;</strong> The engine growl should be prominent and powerful, maintaining a high level of loudness and clarity. Ambient track friction sounds must be subtle and realistic. All sounds should be clean, without distortion, emphasizing speed and motion.<br> <strong>&lt;Spatial&gt;</strong> At the beginning, a car drives past, then the sound gradually fades into the distance, and finally, the car engine is heard directly in front.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/-fTfRh0_RQ4_000030/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/-fTfRh0_RQ4_000030/mmaudio_vggsound_9s.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/-fTfRh0_RQ4_000030/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/-fTfRh0_RQ4_000030/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/-fTfRh0_RQ4_000030/ThinkSound_vgg.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/-fTfRh0_RQ4_000030/-fTfRh0_RQ4_000030_416.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-06': {
+                    title: 'Stream Burbling',
+                    description: "<strong>&lt;Semantic&gt;</strong> Consistent background of a gentle stream burbling to establish the natural water scene. Incorporates ambient water splashes, occasional gurgling, and subtle sounds of a man occasionally moving or fishing, such as faint casting or line jerks. Includes minimal background noise like rustling leaves. <br> <strong>&lt;Temporal&gt;</strong> The gentle stream burbling must be constant throughout the audio. Water splashes and gurgling should occur intermittently and naturally. The man's fishing movements (casting, line jerks) should be infrequent and integrated seamlessly with the stream sounds.<br> <strong>&lt;Aesthetic&gt;</strong> All water sounds must be natural and gentle, with the stream serving as the constant, peaceful foundation. The human and leaf sounds must be very subtle and quiet, designed only to enhance environmental authenticity without disturbing the tranquility. Maintain high audio clarity.<br> <strong>&lt;Spatial&gt;</strong> The stream burbling should provide a wide, immersive sound field. Splashes, gurgling, and the man's actions should be localized and pan slightly to suggest movement within the immediate stream environment. The rustling leaves should occupy a distant, non-localized background space.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/2Tx5L5RBXxw_000200/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/2Tx5L5RBXxw_000200/mmaudio.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/2Tx5L5RBXxw_000200/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/2Tx5L5RBXxw_000200/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/2Tx5L5RBXxw_000200/thinksound.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/2Tx5L5RBXxw_000200/prismaudio.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-07': {
+                    title: 'People Giggling',
+                    description: "<strong>&lt;Semantic&gt;</strong> A clear, authentic recording of a baby laughing intermittently. The core focus remains on the baby's laughter, capturing its natural rhythm and emotional variation — from joyful giggles to moments of startled reaction.<br> <strong>&lt;Temporal&gt;</strong> The baby first laughs lightly, then pauses as it waves its arms with a brief expression of surprise or fear, before continuing to laugh again.<br> <strong>&lt;Aesthetic&gt;</strong> Maintain high clarity and natural dynamics for the baby's voice. The background should remain minimal and silent, with no additional human sounds.<br> <strong>&lt;Spatial&gt;</strong> The baby’s sound should remain centered, preserving intimacy and focus on its laughter and reactions.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/1obzCbmFpa8_000410/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/1obzCbmFpa8_000410/mmaudio_vggsound_9s.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/1obzCbmFpa8_000410/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/1obzCbmFpa8_000410/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/1obzCbmFpa8_000410/ThinkSound_vgg.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/1obzCbmFpa8_000410/1obzCbmFpa8_000410_207.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-08': {
+                    title: 'Panda Sneezing',
+                    description: "<strong>&lt;Semantic&gt;</strong> The audio begins with a brief period of silence over a black screen. Then, a panda appears and sneezes repeatedly. Each sneeze should sound natural and expressive, matching the panda's physical movements. The sneezing sound is the only audible element.<br> <strong>&lt;Temporal&gt;</strong> Start with a few seconds of silence, followed by a series of panda sneezes occurring in natural rhythm — with short pauses between them to reflect breathing and movement. <br> <strong>&lt;Aesthetic&gt;</strong> The sneezing sounds must be clear, detailed, and synchronized with the panda’s gestures. There should be no background noise or additional ambient sounds. <br> <strong>&lt;Spatial&gt;</strong> All sounds should remain centered to reflect the panda positioned in the middle of the frame, maintaining focus and intimacy.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/1EiNSiO0UvU_000000/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/1EiNSiO0UvU_000000/mmaudio_vggsound_9s.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/1EiNSiO0UvU_000000/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/1EiNSiO0UvU_000000/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/1EiNSiO0UvU_000000/ThinkSound_vgg.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/1EiNSiO0UvU_000000/1EiNSiO0UvU_000000_281.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-09': {
+                    title: 'People Laughing',
+                    description: '<strong>&lt;Semantic&gt;</strong> The scene features an elderly person laughing loudly and heartily, filling the space with unrestrained joy. Suddenly, the laughter breaks as the elder raises a hand to cover their mouth and lets out a single, realistic cough. The focus is on the vivid contrast between the exuberant laughter and the abrupt cough.<br> <strong>&lt;Temporal&gt;</strong> Start with a brief silence, then burst into loud, carefree laughter that continues for several seconds before transitioning into one distinct cough. The audio ends naturally as the sound fades into quietness.<br> <strong>&lt;Aesthetic&gt;</strong> Ensure the laughter is full, bright, and dominant, while the cough remains clear and authentic. No background noise or speech should be present.<br> <strong>&lt;Spatial&gt;</strong> The laughter and cough should both be centered, giving a sense of closeness and intimacy.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/vggsound/--U7joUcTCo_000000/gt_9s.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/vggsound/--U7joUcTCo_000000/mmaudio_vggsound_9s.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/vggsound/--U7joUcTCo_000000/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/vggsound/--U7joUcTCo_000000/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/vggsound/--U7joUcTCo_000000/ThinkSound_vgg.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/vggsound/--U7joUcTCo_000000/--U7joUcTCo_000000_208.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-10': {
+                    title: 'Trapped Cat',
+                    description: "<strong>&lt;Semantic&gt;</strong> The audio starts in silence. This is followed by a series of loud, high-pitched, and desperate meows from a tabby kitten. <br> <strong>&lt;Temporal&gt;</strong> Generate continuous meowing sounds based on the kitten's movements. <br> <strong>&lt;Aesthetic&gt;</strong> The kitten's meows must be loud, high-pitched, and convey desperation with absolute clarity. No background music or additional sounds are permitted, ensuring maximum focus on the kitten.<br> <strong>&lt;Spatial&gt;</strong> The kitten's meows should be centrally located, emphasizing its trapped position between tree branches.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Cat_2/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Cat_2/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Cat_2/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Cat_2/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Cat_2/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Cat_2/Cat_2_438.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-11': {
+                    title: 'Accelerating, revving, vroom',
+                    description: '<strong>&lt;Semantic&gt;</strong> Rally car engine sound with a loud approach, high revs, and a downshift. Includes a sharp tire screech and gravel kicking up as the car drifts. The final element is a roaring engine fade-out.<br> <strong>&lt;Temporal&gt;</strong> The audio starts with the loud engine approach, leading immediately into a high rev and downshift sequence. The sharp tire screech and gravel sounds must be synchronized with the peak of the drift action. The sound concludes with a continuous engine roar that smoothly fades away.<br> <strong>&lt;Aesthetic&gt;</strong> The engine sound must be powerful, roaring, and loud, highlighting the downshift and high revs. The tire screech should be sharp and distinct, with clear, dynamic sounds of gravel kicking up. All elements must be clean, reflecting high-quality recording.<br> <strong>&lt;Spatial&gt;</strong> The initial engine sound must pan strongly from left side towards the center to simulate approach. The drift sequence (screech/gravel) should be centered and loud. The final roaring engine must pan away smoothly to the right side, fading in volume to convey travel down a winding road.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Accelerating, revving, vroom_2/Accelerating, revving, vroom_2_500.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-12': {
+                    title: 'Field recording',
+                    description: '<strong>&lt;Semantic&gt;</strong> Ambient forest sounds, including a gentle stream flowing and insects chirping. Features soft rustle of footsteps on dry leaves and twigs. <br> <strong>&lt;Temporal&gt;</strong> The gentle stream and insect chirping should form a continuous, unchanging background throughout. The footsteps should begin subtly on the right, pan gradually to the left, and then gradually recede into the distance. <br> <strong>&lt;Aesthetic&gt;</strong> The forest ambient sounds (stream, insects) should be natural, gentle, and immersive. Footstep sounds must be soft, distinct, and realistic. No background music or additional sounds are permitted, maintaining a pure natural environment.<br> <strong>&lt;Spatial&gt;</strong> The gentle stream and insect chirping should create a broad, consistent stereo ambiance. The footsteps must precisely pan from the right to the left and then recede into the distance, simulating a person walking deeper into the woods.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Field recording_3/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Field recording_3/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Field recording_3/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Field recording_3/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Field recording_3/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Field recording_3/Field recording_3_207.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-13': {
+                    title: 'Playing Double Bass',
+                    description: '<strong>&lt;Semantic&gt;</strong> Audio piece featuring two double basses playing outdoors by a river. One plays a soulful, bowed melody; the other enters with rhythmic pizzicato plucking.<br> <strong>&lt;Temporal&gt;</strong> The audio should begin with the soulful, bowed melody. The second bass, with pizzicato, should enter shortly after the first, establishing a steady accompaniment. Both should play continuously, forming a rich and harmonious duet, and then fade out together.<br> <strong>&lt;Aesthetic&gt;</strong> The bowed melody must be soulful and lyrical, with clear sustain. The pizzicato plucking should be rhythmic and distinct. Both double basses should have a rich, focused tone, blending seamlessly to create a cohesive and expressive duet. No additional background sounds (apart from implied river ambiance) or music are permitted.<br> <strong>&lt;Spatial&gt;</strong> The sound should convey a sense of natural outdoor space, allowing listeners to perceive the ensemble as performing together in an open environment.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Double bass_1/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Double bass_1/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Double bass_1/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Double bass_1/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Double bass_1/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Double bass_1/Double bass_1_469.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-14': {
+                    title: 'Baby Laughter',
+                    description: "<strong>&lt;Semantic&gt;</strong>A sound mimicking a person creating a sound with a pacifier. Followed by a baby's surprised reaction with the sound, and then a woman's joyful laughter.<br> <strong>&lt;Temporal&gt;</strong>The audio should begin with the pacifier sound. This is immediately followed by the baby's surprised laughter, which in turn is followed by the woman's laughter. The sequence should flow quickly and directly from one sound to the next.<br> <strong>&lt;Aesthetic&gt;</strong>The pacifier sound must be soft and warbling with good clarity. Both the baby’s and the woman’s laughter should be joyful and clearly recorded. No background noise or music is permitted, ensuring maximum focus on the sequence of actions and reactions.<br> <strong>&lt;Spatial&gt;</strong>The initial pacifier sound and the baby’s laughter should be generally centered. The woman’s joyful laughter should be positioned slightly off-center to suggest proximity to the baby but distinct separation from the initial sound source.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Baby laughter_1/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Baby laughter_1/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Baby laughter_1/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Baby laughter_1/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Baby laughter_1/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Baby laughter_1/Baby laughter_1_469.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-15': {
+                    title: 'Firing Machine Gun',
+                    description: "<strong>&lt;Semantic&gt;</strong> A person lies prone on the ground, operating a machine gun and firing intermittently toward a distant target, all actions focused at the center of the frame. <br><strong>&lt;Temporal&gt;</strong> The clip captures the start and stop of each burst, emphasizing the timing and rhythm of the gunfire; no other actions interfere. <br><strong>&lt;Aesthetic&gt;</strong> Sound is crisp, sharp, and well-defined; the texture of each gunshot and the impact of shell ejection are clearly perceivable; the rhythm and intensity convey realism; all other noises are absent. <br><strong>&lt;Spatial&gt;</strong> The shooter and weapon occupy the central field of view, with minimal camera movement to ensure clear visibility of each firing action.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Machine gun_1/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Machine gun_1/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Machine gun_1/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Machine gun_1/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Machine gun_1/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Machine gun_1/Machine gun_1_156.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-16': {
+                    title: 'Carpet Cleaning',
+                    description: '<strong>&lt;Semantic&gt;</strong> Audio of a person cleaning a rug on a wet, tiled floor. Includes rhythmic, wet scraping and splashing of a squeegee pushing foamy, dirty water away from the rug in successive strokes. Also features footsteps sloshing through soapy water.<br> <strong>&lt;Temporal&gt;</strong> The audio should consist of a repeating cycle: squeegee scrape/splash, followed by sloshing footsteps, then the next squeegee scrape/splash. This rhythmic action should be consistent throughout the duration of the cleaning process.<br> <strong>&lt;Aesthetic&gt;</strong> The scraping and splashing sounds must be loud, wet, and clear, emphasizing the movement of dirty, foamy water. Footsteps should clearly convey sloshing through soapy water. No background music or additional sounds are permitted, focusing solely on the cleaning actions.<br> <strong>&lt;Spatial&gt;</strong> The rhythmic squeegee scraping sound must progressively move closer to the listener with each successive stroke. The sloshing footsteps should remain localized near the cleaning action.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Liquid_1/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Liquid_1/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Liquid_1/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Liquid_1/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Liquid_1/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Liquid_1/Liquid_1_416.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-17': {
+                    title: 'Rail Transport',
+                    description: "<strong>&lt;Semantic&gt;</strong> Ambient countryside sounds with a gentle breeze rustling the leaves of a large tree. Includes the sound of a steam engine chugging, rumble of wheels on a track, and the powerful chattering and clattering of carriages. <br> <strong>&lt;Temporal&gt;</strong> The gentle breeze and leaf rustling should be constant and continuous. The steam train sounds should start faintly, grow louder as they pass, and then gradually recede.<br> <strong>&lt;Aesthetic&gt;</strong> The ambient sounds should be gentle and soft, creating a natural background. The steam train sounds must be powerful and clear, emphasizing the chugging and clattering elements. No additional background noise or music is permitted.<br> <strong>&lt;Spatial&gt;</strong> The gentle breeze and rustling leaves should create a stable, immersive ambiance. The train sounds should start on the left, then gradually move toward the center of the listener's field, simulating it coming into view.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Rail transport_3/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Rail transport_3/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Rail transport_3/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Rail transport_3/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Rail transport_3/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Rail transport_3/Rail transport_3_479.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-18': {
+                    title: 'Neigh, Whinny',
+                    description: '<strong>&lt;Semantic&gt;</strong>A single, loud, sharp horse squeal from one horse, occurring in the middle of the scene.<br> <strong>&lt;Temporal&gt;</strong>The audio should be silent at the beginning, then the horse emits the squeal. After the squeal, the audio can fade or remain silent.<br> <strong>&lt;Aesthetic&gt;</strong>The horse squeal must be loud, sharp, and clear, conveying surprise or distress. No other sounds or background noise are present.<br> <strong>&lt;Spatial&gt;</strong>The horse squeal should be centered, indicating a single, nearby source in the middle of the listener’s field.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Neigh, whinny_1/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Neigh, whinny_1/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Neigh, whinny_1/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Neigh, whinny_1/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Neigh, whinny_1/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Neigh, whinny_1/Neigh, whinny_1_416.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-19': {
+                    title: 'Chopping, Thudding',
+                    description: "<strong>&lt;Semantic&gt;</strong> The sequence begins with a single axe chop into a branch. Afterwards, two smaller branches are dropped onto the ground, followed by placing the axe against a nearby large tree. All sounds should be focused and centered.<br> <strong>&lt;Temporal&gt;</strong> The audio starts with the axe chop. Immediately after, the sounds of the two branches hitting the ground occur, followed by the subtle sound of the axe being set against the tree.<br> <strong>&lt;Aesthetic&gt;</strong> All actions—the chop, the branches dropping, and the axe placement—must be clear and distinct. No additional background music or extraneous sounds are present.<br> <strong>&lt;Spatial&gt;</strong> All sounds should be centered, indicating a single, nearby source in the middle of the listener's field.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_63/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_63/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_63/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_63/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_63/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_63/Multiple events_63_416.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                'case-20': {
+                    title: 'Machining, Tapping',
+                    description: '<strong>&lt;Semantic&gt;</strong> The sequence begins with a mechanical frame rotating and being secured, followed by the installation of a metal sheet and a series of light, crisp metallic taps. All sounds should remain centered.<br> <strong>&lt;Temporal&gt;</strong> The audio starts with the frame rotation, then the securing action, followed immediately by the metal sheet installation, and concludes with the light metallic taps.<br> <strong>&lt;Aesthetic&gt;</strong> All mechanical and metallic sounds must be clear, crisp, and well-defined. No additional background noise or music is included.<br> <strong>&lt;Spatial&gt;</strong> All sounds should be centered, giving the impression of a single, nearby source throughout the sequence.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_132/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_132/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_132/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_132/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_132/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_132/Multiple events_132_437.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-21': {
+                    title: 'Ice cutting, Freezer shutting',
+                    description: '<strong>&lt;Semantic&gt;</strong> Sequence of sounds: crisp scraping of a blade across an ice cube, a hot metal stamp sizzles and crackles as it is pressed into the ice, a faint clink as it is lifted, a soft whoosh of a freezer door opening, and the clatter of ice being placed on a shelf. <br> <strong>&lt;Temporal&gt;</strong> The sequence must be linear: scrape, sizzle/crackle, faint clink, soft whoosh, and clatter. Transitions should be immediate. <br> <strong>&lt;Aesthetic&gt;</strong> All sounds must be crisp and clear. The sizzle/crackle should be prominent. The whoosh and clink must be soft. No background music or additional sounds are permitted.<br> <strong>&lt;Spatial&gt;</strong> The sound should be centered and close.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_139/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_139/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_139/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_139/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_139/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_139/Multiple events_139_41.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-22': {
+                    title: 'Unlocking, Pouring',
+                    description: "<strong>&lt;Semantic&gt;</strong> A person unlocks a wooden box, picks up a bottle filled with granules, opens the cap, taps the bottle to pour the granules into a container, and returns it, all actions focused at the center of view. <br><strong>&lt;Temporal&gt;</strong> The clip starts with unlocking the box, followed by smooth, sequential hand movements; each action is clearly distinguishable and deliberate. <br><strong>&lt;Aesthetic&gt;</strong> Focus remains on the hands and objects; motions are crisp and clean; textures of the box, bottle, and granules are clearly visible; no background distractions. <br><strong>&lt;Spatial&gt;</strong> All interactions occur at the center of the frame, with minimal camera movement and clear visibility of pouring action.",
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_114/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_114/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_114/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_114/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_114/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_114/Multiple events_114_406.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-23': {
+                    title: 'Smoothing, Flipping',
+                    description: '<strong>&lt;Semantic&gt;</strong> Ambient paper handling sounds featuring a sequence of placing a sheet of paper onto a wooden desk, smoothing it flat, and then flipping it over. <br> <strong>&lt;Temporal&gt;</strong> The audio should follow a linear sequence: place, smooth, flip. Transitions should be immediate and natural. <br> <strong>&lt;Aesthetic&gt;</strong> All paper sounds must be crisp and detailed, emphasizing the contact with the desk and the flipping action. No background music or additional sounds are permitted.<br> <strong>&lt;Spatial&gt;</strong> The sounds should be centralized and close to the listener, simulating direct interaction with the paper in front of the microphone.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_391/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_391/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_391/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_391/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_391/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_391/Multiple events_391_437.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-24': {
+                    title: 'Plastic Pop Opening',
+                    description: '<strong>&lt;Semantic&gt;</strong> Sequence: subtle plastic wrapper crinkling sound, followed by a sharp, distinct popping sound for a plastic lid twist-opening, then a similar sharp popping sound for a second lid opening. <br> <strong>&lt;Temporal&gt;</strong> The sequence must be linear: crinkling, then the first pop, immediately followed by the second pop. Transitions should be immediate and precise. <br> <strong>&lt;Aesthetic&gt;</strong> All sounds must be clear and precise. The crinkling should be subtle. Both popping sounds must be sharp and distinct. No additional background noise or music is permitted.<br> <strong>&lt;Spatial&gt;</strong> The plastic wrapper crinkling should be centered. The first sharp popping sound must be on the center-right. The second sharp popping sound must be on the center-left.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_156/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_156/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_156/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_156/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_156/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_156/Multiple events_156_353.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-25': {
+                    title: 'Unrolling and Tearing Tape, Smoothing',
+                    description: '<strong>&lt;Semantic&gt;</strong> Sequence: crisp, rustling sound of adhesive tape unrolling, followed by a sharp tearing noise. Concludes with the sound of the roll being placed down and a gentle, crinkling sound of the tape being pressed and smoothed onto a package. <br> <strong>&lt;Temporal&gt;</strong> The sequence must be linear: unroll, tear, roll placed down, and finally, pressing/smoothing. Transitions should be precise and quick. <br> <strong>&lt;Aesthetic&gt;</strong> The tape sounds must be crisp and clear. The tearing noise should be sharp and distinct. The final pressing/smoothing should be gentle but audible. No additional sounds or background noise are permitted.<br> <strong>&lt;Spatial&gt;</strong> All sounds should be centered and close to the listener, simulating direct interaction with the tape and package.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_98/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_98/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_98/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_98/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_98/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_98/Multiple events_98_156.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-26': {
+                    title: 'Piercing, Rubbing',
+                    description: '<strong>&lt;Semantic&gt;</strong> Generate audio of a sharp tool piercing into paper once and then being removed. Followed by an eraser rubbing vigorously against the paper, creating a continuous, scratchy friction sound. No additional background noise or music is included.<br><strong>&lt;Temporal&gt;</strong> The sequence begins with the single piercing and removal of the tool. The eraser rubbing follows continuously, maintaining a scratchy texture throughout.<br> <strong>&lt;Aesthetic&gt;</strong> All sounds must be clear and distinct. The tool piercing should be noticeable but not exaggerated, and the eraser friction should be continuous and textured.<br> <strong>&lt;Spatial&gt;</strong> All sounds should be centralized, close to the listener, emphasizing direct interaction with the paper.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_89/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_89/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_89/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_89/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_89/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_89/Multiple events_89_406.mp4', preview: null, type: 'video' }
+                    ]
+                },
+                'case-27': {
+                    title: 'Exchanging Soap, Pouring',
+                    description: '<strong>&lt;Semantic&gt;</strong> Sequence includes a light thud of a plastic bottle on a stone counter, a plastic pump squeaking as it is unscrewed, a soft plastic bottle crinkling as it is picked up, and finally the thick, viscous sound of soap being poured.<br> <strong>&lt;Temporal&gt;</strong> The sequence must be linear: bottle thud, pump unscrewing, bottle crinkling, and concluding with the soap pouring. Transitions should be natural and immediate.<br> <strong>&lt;Aesthetic&gt;</strong> All sounds must maintain clarity and natural sound quality. The plastic thud should be light. The pump squeak should be distinct. The soap pouring should be thick and viscous. No background music or ambient noise is permitted.<br> <strong>&lt;Spatial&gt;</strong> All sounds should be centralized and close to the listener, simulating direct interaction with the objects on a counter.',
+                    media: [
+                        { title: 'Ground Truth', url: 'cases/audiocanvas/Multiple events_304/gt.mp4', preview: null, type: 'video' },
+                        { title: 'MMAudio', url: 'cases/audiocanvas/Multiple events_304/mmaudio_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'AudioX', url: 'cases/audiocanvas/Multiple events_304/audiox.mp4', preview: null, type: 'video' },
+                        { title: 'HunyuanVideo-Foley', url: 'cases/audiocanvas/Multiple events_304/hunyuan.mp4', preview: null, type: 'video' },
+                        { title: 'ThinkSound', url: 'cases/audiocanvas/Multiple events_304/thinksound_audiocanvas_0923.mp4', preview: null, type: 'video' },
+                        { title: 'PRISMAUDIO', url: 'cases/audiocanvas/Multiple events_304/Multiple events_304_312.mp4', preview: null, type: 'video' }
+                    ]
+                },
+
+                default: { 
+                    title: 'Case Data Not Found (ID: ' + caseId + ')', 
+                    description: 'Error loading case details. Please check the case ID. This is a placeholder for the Decomposed Chain-of-Thought analysis.', 
+                    media: [] 
+                }
+            };
+
+            const createMediaHTML = (data) => {
+                let mediaTag = '';
+                const titleHTML = `<div style="font-family: 'Nunito', sans-serif; font-weight: 500; color: var(--text-color); margin-bottom: 10px;">${data.title}</div>`;
+
+                if (data.type === 'video') {
+                    mediaTag = `<video controls width="100%" poster="${data.preview || ''}" src="${data.url}" style="width:100%; border-radius: 12px; background-color: black;"><p>Your browser does not support the video tag.</p></video>`;
+                } else if (data.type === 'audio') {
+                    mediaTag = `<audio controls src="${data.url}" style="width: 100%;"><p>Your browser does not support the audio element.</p></audio>`;
+                } else {
+                    return '<p style="color: red;">Invalid media type.</p>';
+                }
+                return titleHTML + mediaTag;
+            };
+
+            const data = cases[caseId] || cases['default'];
+
+            modalTitle.textContent = `${data.title}`;
+            modalDescription.innerHTML = data.description;
+            
+            data.media.forEach((item, index) => {
+                const mediaId = `media-${index + 1}`;
+                const mediaContainer = document.getElementById(mediaId);
+                
+                if (mediaContainer) {
+                    mediaContainer.innerHTML = createMediaHTML(item);
+                    mediaContainer.style.minHeight = 'auto'; 
+                    mediaContainer.style.display = 'block';
+                    const player = mediaContainer.querySelector('video, audio');
+                    if (player) player.load();
+                }
+            });
+        }
+
+        function openModal(caseId) {
+            loadCaseData(caseId);
+            demoModal.style.display = "flex";
+        }
+
+        function closeModal() {
+            demoModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == demoModal) {
+                closeModal();
+            }
+            if (event.target == ablationModal) {
+                closeAblationModal();
+            }
+        }
+    </script>
+
+    <script>
+        const videoPaths = [
+            "cases/vggsound/3ClbaJYWVO4_000030/prismaudio.mp4",
+            "cases/vggsound/2M0i--pR-To_000037/prismaudio.mp4",
+            "https://github.com/user-attachments/assets/76c658e7-8269-4c79-823e-46e53ef439df",
+            "cases/audiocanvas/Rail transport_3/Rail transport_3_479.mp4",
+            "cases/vggsound/1uCzQCdCC1U_000170/1uCzQCdCC1U_000170_416.mp4",
+            "cases/vggsound/ZyiDGq0qh2s_000030/prismaudio.mp4",
+            "cases/vggsound/--U7joUcTCo_000000/--U7joUcTCo_000000_208.mp4"
+        ];
+
+        const carousel = document.getElementById('carousel');
+        const N = videoPaths.length;
+
+        function createVideoCard(src) {
+            const container = document.createElement('div');
+            container.className = 'video-card';
+            container.style.position = 'relative';
+
+            const video = document.createElement('video');
+            video.src = src;
+            video.setAttribute('playsinline', '');
+            video.style.width = '100%';
+            video.style.borderRadius = '10px';
+            video.style.cursor = 'pointer';
+            video.style.backgroundColor = '#000';
+
+            // 点击切换播放/暂停
+            video.addEventListener('click', () => {
+                // 1. Calculate the center of the carousel's visible area
+                const carouselCenter = carousel.offsetWidth / 2;
+                
+                // 2. Calculate the center position of the clicked card
+                //    (container.offsetLeft is the card's left edge relative to the carousel)
+                const cardCenter = container.offsetLeft + container.offsetWidth / 2;
+
+                // 3. Calculate the distance from the absolute center
+                const distance = Math.abs((carousel.scrollLeft + carouselCenter) - cardCenter);
+
+                // 4. Check if the card is already in the middle
+                //    (Using a small threshold like 50px to account for minor inaccuracies)
+                if (distance < 50) {
+                    // If it's already centered, just play or pause the video
+                    if (video.paused) {
+                        video.play().catch(e => console.warn("Play error:", e));
+                    } else {
+                        video.pause();
+                    }
+                } else {
+                    // If it's not centered, scroll it to the middle
+                    const targetScrollLeft = cardCenter - carouselCenter;
+                    carousel.scrollTo({
+                        left: targetScrollLeft,
+                        behavior: 'smooth' // This creates the smooth scrolling animation
+                    });
+                    if (video.paused) {
+                        video.play().catch(e => console.warn("Play error:", e));
+                    } else {
+                        video.pause();
+                    }
+                }
+            });
+
+            container.appendChild(video);
+            return container;
+        }
+
+        // 构建无限轮播
+        const allCards = [];
+        for (let r = 0; r < 3; r++) {
+            videoPaths.forEach(src => allCards.push(createVideoCard(src)));
+        }
+        allCards.forEach(card => carousel.appendChild(card));
+
+        let sectionWidth;
+
+        function setupCarousel() {
+            const cardWidth = carousel.children[0].offsetWidth;
+            const style = getComputedStyle(carousel.children[0]);
+            const gap = parseInt(style.marginRight) + parseInt(style.marginLeft);
+            sectionWidth = N * (cardWidth + gap);
+
+            // 初始位置在中间组
+            carousel.scrollLeft = sectionWidth + gap*11/16;
+
+            // 无限循环逻辑
+            carousel.addEventListener('scroll', () => {
+                if (carousel.scrollLeft >= sectionWidth * 2) {
+                    carousel.scrollLeft -= sectionWidth;
+                } else if (carousel.scrollLeft <= 0) {
+                    carousel.scrollLeft += sectionWidth;
+                }
+            });
+        }
+
+        setTimeout(() => {
+            setupCarousel();
+
+            // 视觉缩放效果
+            const updateScales = () => {
+                const containerCenter = carousel.scrollLeft + carousel.parentElement.offsetWidth / 2;
+                Array.from(carousel.children).forEach(card => {
+                    const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+                    const positionRatio = (cardCenter - containerCenter) / (carousel.offsetWidth * 0.8);
+                    const scale = 0.89 + 0.27 * Math.cos(positionRatio * Math.PI);
+                    card.style.transform = `scale(${scale})`;
+                    card.style.opacity = 0.8 + 0.2 * (1 - Math.abs(positionRatio));
+                });
+                requestAnimationFrame(updateScales);
+            };
+            updateScales();
+        }, 100);
+
+        // 鼠标拖拽滚动
+        let isDragging = false;
+        let startX;
+        let scrollLeft;
+
+        carousel.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+            carousel.classList.add('dragging');
+        });
+
+        carousel.addEventListener('mouseleave', () => {
+            isDragging = false;
+            carousel.classList.remove('dragging');
+        });
+
+        carousel.addEventListener('mouseup', () => {
+            isDragging = false;
+            carousel.classList.remove('dragging');
+        });
+
+        carousel.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+    </script>
+
+    </body>
+</html>
