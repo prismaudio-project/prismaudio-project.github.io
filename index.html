@@ -632,25 +632,38 @@
             </div>
         </div>
         
-        <div class="publication-links" style="margin-bottom: 20px;margin-top: -30px;">
-        <!-- PDF Link. -->
-        <span class="link-block">
-          <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark">
-            <span class="icon">
-              <i class="fas fa-file-pdf"></i>
-            </span>
-            <span>Paper</span>
-          </a>
-        </span>
-        <span class="link-block">
-          <a href="https://github.com/liuhuadai/ThinkSound"
-            class="external-link button is-normal is-rounded is-dark">
-            <span class="icon">
-              <i class="fab fa-github"></i>
-            </span>
-            <span>Code</span>
-          </a>
-        </span>
+        <div class="publication-links" style="margin-bottom: 20px; margin-top: -30px;">
+          <span class="link-block">
+            <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark expanded-click">
+              <span class="icon">
+                <i class="fas fa-file-pdf"></i>
+              </span>
+              <span>Paper</span>
+            </a>
+          </span>
+          <span class="link-block">
+            <a href="https://github.com/liuhuadai/ThinkSound"
+              class="external-link button is-normal is-rounded is-dark expanded-click">
+              <span class="icon">
+                <i class="fab fa-github"></i>
+              </span>
+              <span>Code</span>
+            </a>
+          </span>
+        </div>
+        
+        <style>
+        .expanded-click {
+          position: relative;
+        }
+        .expanded-click::before {
+          content: "";
+          position: absolute;
+          top: -30px;
+          bottom: -10px;
+        }
+        </style>
+
       </div>
         
     </header>
@@ -1590,5 +1603,6 @@
 
     </body>
 </html>
+
 
 
