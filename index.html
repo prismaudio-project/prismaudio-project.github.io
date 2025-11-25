@@ -975,7 +975,14 @@
 
         <hr>
         
-        <section id="BibTex">
+        <section id="BibTex" style="
+          contain: layout style paint;  /* 关键：隔离布局、样式、绘制 */
+          width: fit-content;           /* 宽度由内容决定，但受 max-width 限制 */
+          max-width: 800px;
+          margin: 0 auto 40px auto;     /* 居中 + 底部间距 */
+          overflow-x: auto;
+          text-align: centre;
+        ">
         <h2>BibTex</h2>
         <div style="text-align: centre; margin-bottom: 40px; color: var(--light-text-color);"> If you find our work useful, please cite our paper: </div>
             <div style="text-align: left; max-width:1000px;overflow-x: auto;margin: 0 auto ">
@@ -1624,6 +1631,7 @@
 
 </body>
 </html>
+
 
 
 
