@@ -632,39 +632,37 @@
             </div>
         </div>
         
-        <div class="publication-links" style="margin-bottom: 20px; margin-top: -30px; position: relative; z-index: 1000;">
-          <a href="https://arxiv.org/abs/" class="link-block expanded-link">
-            <span class="external-link button is-normal is-rounded is-dark">
+        <div class="publication-links" style="margin-bottom: 20px; margin-top: -30px;">
+          <span class="link-block">
+            <a href="https://arxiv.org/abs/" class="external-link button is-normal is-rounded is-dark expanded-click">
               <span class="icon">
                 <i class="fas fa-file-pdf"></i>
               </span>
               <span>Paper</span>
-            </span>
-          </a>
-        
-          <a href="https://github.com/liuhuadai/ThinkSound" class="link-block expanded-link">
-            <span class="external-link button is-normal is-rounded is-dark">
+            </a>
+          </span>
+          <span class="link-block">
+            <a href="https://github.com/liuhuadai/ThinkSound"
+              class="external-link button is-normal is-rounded is-dark expanded-click">
               <span class="icon">
                 <i class="fab fa-github"></i>
               </span>
               <span>Code</span>
-            </span>
-          </a>
+            </a>
+          </span>
         </div>
         
         <style>
-        .link-block {
-          display: inline-block;
-          padding: 16px; /* ← 这就是扩大的点击区域！ */
-          margin: 0 4px; /* 可选：调整间距 */
-          text-decoration: none;
+        .expanded-click {
+          position: relative;
         }
-        
-        .link-block:hover .button {
-          opacity: 0.9; /* 可选：hover 反馈 */
+        .expanded-click::before {
+          content: "";
+          position: absolute;
+          top: -30px;
+          bottom: -10px;
         }
         </style>
-
 
       </div>
         
@@ -1605,8 +1603,5 @@
 
     </body>
 </html>
-
-
-
 
 
